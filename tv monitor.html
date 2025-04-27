@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Pacientes Cirúrgicos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 15px 10px;
+            background-color: #f5f5f5;
+            position: relative; /* Adicionado para referência de posicionamento */
+        }
+        
+        /* Estilo do logo - Posicionamento absoluto no canto superior direito */
+        .unimed-logo {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            height: 150px; /* Altura ajustável conforme necessidade */
+        }
+        
+        /* Ajuste no título principal para acomodar o logo */
+        h1 {
+            text-align: center;
+            color: #333;
+            margin: 60px 0 20px 0; /* Margem superior aumentada */
+            font-size: 28px;
+        }
+
+        /* O restante do seu CSS permanece exatamente igual */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .legend-color {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            border: 2px solid #999;
+        }
+        .add-patient-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        .add-patient-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: #2196F3;
+            color: white;
+            font-size: 36px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        .add-patient-form {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            width: 350px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+            font-size: 18px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+        }
+        input[type="date"] {
+            color: black;
+        }
+        input[type="date"]:valid {
+            color: black;
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .form-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        #confirmBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #cancelBtn {
+            background-color: #f44336;
+            color: white;
+        }
+        .stages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .stage {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        .patients-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            min-height: 180px;
+            padding: 10px 0;
+        }
+        .patient-square {
+            width: 150px;
+            height: 180px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            background-color: white;
+        }
+        .waiting-square {
+            background-color: #c8e6c9;
+            border: 3px solid #4CAF50;
+        }
+        .surgery-square {
+            background-color: #ffe0b2;
+            border: 3px solid #FF9800;
+        }
+        .recovery-square {
+            background-color: #bbdefb;
+            border: 3px solid #2196F3;
+        }
+        .patient-initials {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            max-width: 90%;
+            word-wrap: break-word;
+        }
+        .patient-date {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 40px;
+            color: black;
+        }
+        .patient-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            background-color: rgba(255,255,255,0.7);
+            padding: 8px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+        }
+        .prev-btn {
+            background-color: #607D8B;
+        }
+        .next-btn {
+            background-color: #4CAF50;
+        }
+        .empty-state {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+            padding: 40px 0;
+            width: 100%;
+            font-size: 18px;
+        }
+        .stage-arrow {
+            text-align: center;
+            margin: 5px 0;
+            color: #666;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .error-message {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo da Unimed Araraquara -->
+    <img class="unimed-logo" 
+         src="https://www.unimedara.com.br/Content/themes/base/images/UnimedLogo_fb.png" 
+         alt="Unimed Araraquara">
+    
+    <h1>Gerenciamento de Pacientes Cirúrgicos</h1>
+    
+    <!-- O restante do seu HTML permanece exatamente igual -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #c8e6c9; border-color: #4CAF50;"></div>
+            <span>Aguardando</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #ffe0b2; border-color: #FF9800;"></div>
+            <span>Em Cirurgia</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #bbdefb; border-color: #2196F3;"></div>
+            <span>Recuperação</span>
+        </div>
+    </div>
+    
+    <div class="add-patient-container">
+        <button class="add-patient-btn" id="showFormBtn">+</button>
+        <div class="add-patient-form" id="addPatientForm">
+            <div class="form-group">
+                <label for="patientName">Nome Completo:</label>
+                <input type="text" id="patientName" placeholder="Digite o nome completo">
+                <div class="error-message" id="nameError">Por favor, insira apenas letras e espaços</div>
+            </div>
+            <div class="form-group">
+                <label for="birthDate">Data de Nascimento:</label>
+                <input type="date" id="birthDate">
+                <div class="error-message" id="dateError">Por favor, insira uma data válida</div>
+            </div>
+            <div class="form-actions">
+                <button id="confirmBtn">Adicionar</button>
+                <button id="cancelBtn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stages-container">
+        <div class="stage" id="waiting">
+            <div class="patients-row" id="waitingList">
+                <div class="empty-state">Nenhum paciente aguardando</div>
+            </div>
+        </div>
+        
+        <div class="stage-arrow">↓</div>
+        
+        <div class="stage" id="surgery">
+            <div class="patients-row" id="surgeryList">
+                <div class="empty-state">Nenhum paciente em cirurgia</div>
+            </div>
+        </div>
+        
+        <div class="stage-arrow">↓</div>
+        
+        <div class="stage" id="recovery">
+            <div class="patients-row" id="recoveryList">
+                <div class="empty-state">Nenhum paciente em recuperação</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- O JavaScript permanece exatamente o mesmo -->
+    <script>
+        // ... (todo o seu JavaScript existente permanece igual)
+        let patients = [];
+        
+        const showFormBtn = document.getElementById('showFormBtn');
+        const addPatientForm = document.getElementById('addPatientForm');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const patientNameInput = document.getElementById('patientName');
+        const birthDateInput = document.getElementById('birthDate');
+        const nameError = document.getElementById('nameError');
+        const dateError = document.getElementById('dateError');
+        
+        // Configurar a data máxima como hoje
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            const maxDate = yyyy + '-' + mm + '-' + dd;
+            birthDateInput.max = maxDate;
+            
+            // Força cor preta se já houver valor (em caso de recarregamento)
+            if(birthDateInput.value) {
+                birthDateInput.style.color = 'black';
+            }
+        });
+        
+        showFormBtn.addEventListener('click', () => {
+            addPatientForm.style.display = 'flex';
+            showFormBtn.style.display = 'none';
+            // Limpa os erros ao abrir o formulário
+            hideErrors();
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+            addPatientForm.style.display = 'none';
+            showFormBtn.style.display = 'flex';
+            patientNameInput.value = '';
+            birthDateInput.value = '';
+            hideErrors();
+        });
+        
+        // Validação do nome (apenas letras e espaços)
+        patientNameInput.addEventListener('input', function() {
+            const regex = /^[A-Za-zÀ-ÿ\s]+$/;
+            if (this.value && !regex.test(this.value)) {
+                nameError.style.display = 'block';
+            } else {
+                nameError.style.display = 'none';
+            }
+        });
+        
+        // Validação da data
+        birthDateInput.addEventListener('input', function() {
+            if (this.value && (new Date(this.value) > new Date())) {
+                dateError.style.display = 'block';
+            } else {
+                dateError.style.display = 'none';
+                this.style.color = 'black';
+            }
+        });
+        
+        confirmBtn.addEventListener('click', addPatient);
+        
+        function hideErrors() {
+            nameError.style.display = 'none';
+            dateError.style.display = 'none';
+        }
+        
+        function addPatient() {
+            const name = patientNameInput.value.trim();
+            const birthDate = birthDateInput.value;
+            
+            // Validações finais antes de adicionar
+            const nameRegex = /^[A-Za-zÀ-ÿ\s]+$/;
+            if (!name || !nameRegex.test(name)) {
+                nameError.style.display = 'block';
+                return;
+            }
+            
+            if (!birthDate || new Date(birthDate) > new Date()) {
+                dateError.style.display = 'block';
+                return;
+            }
+            
+            const patient = {
+                id: Date.now(),
+                name: name,
+                initials: getInitials(name),
+                birthDate: formatDateFull(birthDate),
+                stage: 'waiting'
+            };
+            
+            patients.push(patient);
+            renderPatients();
+            
+            // Limpar campos e esconder formulário
+            patientNameInput.value = '';
+            birthDateInput.value = '';
+            addPatientForm.style.display = 'none';
+            showFormBtn.style.display = 'flex';
+            hideErrors();
+        }
+        
+        function getInitials(fullName) {
+            const names = fullName.split(' ');
+            let initials = '';
+            const ignoredWords = ['de', 'da', 'dos', 'das', 'do', 'e'];
+            
+            // Pega a primeira letra de cada nome, ignorando preposições
+            for (let i = 0; i < names.length && initials.length < 4; i++) {
+                const word = names[i].toLowerCase();
+                if (names[i].length > 0 && !ignoredWords.includes(word)) {
+                    initials += names[i][0].toUpperCase();
+                }
+            }
+            
+            return initials;
+        }
+        
+        function formatDateFull(dateString) {
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
+        function movePatient(patientId, direction) {
+            const patientIndex = patients.findIndex(p => p.id === patientId);
+            
+            if (patientIndex !== -1) {
+                if (direction === 'next') {
+                    if (patients[patientIndex].stage === 'waiting') {
+                        patients[patientIndex].stage = 'surgery';
+                    } else if (patients[patientIndex].stage === 'surgery') {
+                        patients[patientIndex].stage = 'recovery';
+                    } else if (patients[patientIndex].stage === 'recovery') {
+                        if (confirm(`Deseja dar alta para o paciente ${patients[patientIndex].initials}?`)) {
+                            patients.splice(patientIndex, 1);
+                        }
+                    }
+                } else if (direction === 'prev') {
+                    if (patients[patientIndex].stage === 'surgery') {
+                        patients[patientIndex].stage = 'waiting';
+                    } else if (patients[patientIndex].stage === 'recovery') {
+                        patients[patientIndex].stage = 'surgery';
+                    }
+                }
+                
+                renderPatients();
+            }
+        }
+        
+        function renderPatients() {
+            const waitingList = document.getElementById('waitingList');
+            const surgeryList = document.getElementById('surgeryList');
+            const recoveryList = document.getElementById('recoveryList');
+            
+            // Limpar listas
+            waitingList.innerHTML = patients.filter(p => p.stage === 'waiting').length === 0 ? 
+                '<div class="empty-state">Nenhum paciente aguardando</div>' : '';
+            surgeryList.innerHTML = patients.filter(p => p.stage === 'surgery').length === 0 ? 
+                '<div class="empty-state">Nenhum paciente em cirurgia</div>' : '';
+            recoveryList.innerHTML = patients.filter(p => p.stage === 'recovery').length === 0 ? 
+                '<div class="empty-state">Nenhum paciente em recuperação</div>' : '';
+            
+            patients.forEach(patient => {
+                const square = document.createElement('div');
+                square.className = `patient-square ${patient.stage}-square`;
+                
+                const initials = document.createElement('div');
+                initials.className = 'patient-initials';
+                initials.textContent = patient.initials;
+                
+                const date = document.createElement('div');
+                date.className = 'patient-date';
+                date.textContent = patient.birthDate;
+                
+                const actions = document.createElement('div');
+                actions.className = 'patient-actions';
+                
+                // Botão de voltar
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'action-btn prev-btn';
+                prevBtn.textContent = '↑';
+                prevBtn.disabled = patient.stage === 'waiting';
+                prevBtn.title = "Voltar etapa";
+                prevBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    movePatient(patient.id, 'prev');
+                });
+                
+                // Botão de avançar
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'action-btn next-btn';
+                nextBtn.textContent = patient.stage === 'recovery' ? 'A' : '↓';
+                nextBtn.title = patient.stage === 'recovery' ? "Dar alta" : "Avançar etapa";
+                nextBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    movePatient(patient.id, 'next');
+                });
+                
+                actions.appendChild(prevBtn);
+                actions.appendChild(nextBtn);
+                
+                square.appendChild(initials);
+                square.appendChild(date);
+                square.appendChild(actions);
+                
+                // Adicionar à lista apropriada
+                switch(patient.stage) {
+                    case 'waiting':
+                        waitingList.appendChild(square);
+                        break;
+                    case 'surgery':
+                        surgeryList.appendChild(square);
+                        break;
+                    case 'recovery':
+                        recoveryList.appendChild(square);
+                        break;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
